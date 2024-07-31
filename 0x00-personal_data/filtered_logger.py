@@ -42,20 +42,21 @@ class RedactingFormatter(logging.Formatter):
         return filter_datum(self.fields, self.REDACTION,
                             original_msg, self.SEPARATOR)
 
-    def get_logger() -> logging.Logger:
-        """
-        Creates a logger named 'user_data' with INFO level
-        and a StreamHandler that uses RedactingFormatter
-        to obfuscate PII fields.
-        """
 
-        logger = logging.getLogger("user_data")
-        logger.setLevel(logging.INFO)
-        logger.propagate = False
+def get_logger() -> logging.Logger:
+    """
+    Creates a logger named 'user_data' with INFO level
+    and a StreamHandler that uses RedactingFormatter
+    to obfuscate PII fields.
+    """
 
-        stream_handler = logging.StreamHandler()
-        formatter = RedactingFormatter(list(PII_FIELDS))
-        stream_handler.setFormatter(formatter)
+    logger = logging.getLogger("user_data")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
 
-        logger.addHandler(stream_handler)
-        return logger
+    stream_handler = logging.StreamHandler()
+    formatter = RedactingFormatter(list(PII_FIELDS))
+    stream_handler.setFormatter(formatter)
+
+    logger.addHandler(stream_handler)
+    return logger

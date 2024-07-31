@@ -7,8 +7,9 @@ from typing import List
 import logging
 
 
-def filter_datum(fields: List[str], redaction: str,
-                 message: str, separator: str) -> str:
+def filter_datum(
+    fields: List[str], redaction: str, message: str, separator: str
+) -> str:
     """
     Obfuscates specified fields in a log message.
     """
@@ -16,9 +17,9 @@ def filter_datum(fields: List[str], redaction: str,
     return re.sub(pattern, lambda m:
                   f"{m.group().split('=')[0]}={redaction}", message)
 
+
 class RedactingFormatter(logging.Formatter):
-    """ Redacting Formatter class
-        """
+    """Redacting Formatter class"""
 
     REDACTION = "***"
     FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
@@ -36,4 +37,5 @@ class RedactingFormatter(logging.Formatter):
         Format the log record by obfuscating specified fields.
         """
         original_msg = super(RedactingFormatter, self).format(record)
-        return filter_datum(self.fields, self.REDACTION, original_msg, self.SEPARATOR)
+        return filter_datum(self.fields, self.REDACTION,
+                            original_msg, self.SEPARATOR)

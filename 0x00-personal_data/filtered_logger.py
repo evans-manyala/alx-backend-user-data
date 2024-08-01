@@ -7,7 +7,7 @@ from typing import List
 import logging
 import os
 import mysql.connector
-from mysql.connector import Error
+
 
 PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 
@@ -74,23 +74,8 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
     passwd = os.getenv('PERSONAL_DATA_DB_PASSWORD', '')
     host = os.getenv('PERSONAL_DATA_DB_HOST', 'localhost')
     db_name = os.getenv('PERSONAL_DATA_DB_NAME')
-    if not db_name:
-        raise ValueError(
-            "PERSONAL_DATA_DB_NAME environment variable is required.")
-
-    try:
-        conn = mysql.connector.connect(user=user,
-                                       password=passwd,
-                                       host=host,
-                                       database=db_name)
-        if conn.is_connected():
-            print("Successfully connected to the database")
-            return conn
-        else:
-            raise ConnectionError("Failed to connect to the database")
-    except Error as e:
-        print(f"Error: {e}")
-        raise
-    except ConnectionError as ce:
-        print(ce)
-        raise
+    conn = mysql.connector.connect(user=user,
+                                   password=passwd,
+                                   host=host,
+                                   database=db_name)
+    return conn

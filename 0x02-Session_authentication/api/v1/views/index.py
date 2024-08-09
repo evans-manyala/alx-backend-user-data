@@ -32,7 +32,7 @@ def status() -> str:
     Check the status of the API.
     - Returns a JSON response with the status of the API as "OK".
     """
-    return jsonify({"status": "OK"})
+    return jsonify({"status": "OK"}), 200
 
 
 @app_views.route("/stats/", strict_slashes=False)

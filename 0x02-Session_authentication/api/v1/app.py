@@ -2,12 +2,15 @@
 """
 API Route Module
 """
+
+import os
 from os import getenv
 from api.v1.views import app_views
 from flask import Flask, jsonify, abort, request
-from flask_cors import CORS
-import os
+from flask_cors import CORS, cross_origin
 import logging
+from api.v1.auth.session_auth import SessionAuth
+
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
@@ -24,6 +27,17 @@ elif AUTH_TYPE == "basic_auth":
     from api.v1.auth.basic_auth import BasicAuth
 
     auth = BasicAuth()
+if AUTH_TYPE == "session_auth":
+
+    auth = SessionAuth()
+
+if AUTH_TYPE == "session_exp_auth":
+
+    auth = SessionExpAuth()
+
+if AUTH_TYPE == "session_db_auth":
+
+    auth = SessionDBAuth()
 
 
 @app.before_request
@@ -40,6 +54,7 @@ def before_request():
             "/api/v1/auth_session/login/",
         ]
         if auth.require_auth(request.path, excluded_paths):
+            user = auth.current_user(request)
             if (
                 auth.authorization_header(request) is None
                 and auth.session_cookie(request) is None
@@ -49,6 +64,9 @@ def before_request():
             if auth.current_user(request) is None:
                 logging.debug("Forbidden: No current user")
                 abort(403, description="Forbidden")
+            if user is None:
+                abort(403)
+            request.current_user = user
 
 
 @app.errorhandler(404)
@@ -77,6 +95,6 @@ def forbidden(error) -> str:
 
 if __name__ == "__main__":
     host = getenv("API_HOST", "0.0.0.0")
-    port = getenv("API_PORT", "5000")
+    port = getenv("API_PORT", 5000)
     logging.basicConfig(level=logging.DEBUG)  # Enable debug logging
-    app.run(host=host, port=port)
+    app.run(host=host, port=int(port))

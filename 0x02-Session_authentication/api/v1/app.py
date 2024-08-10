@@ -37,10 +37,14 @@ def before_request():
             "/api/v1/status/",
             "/api/v1/unauthorized/",
             "/api/v1/forbidden/",
+            "/api/v1/auth_session/login/",
         ]
         if auth.require_auth(request.path, excluded_paths):
-            if auth.authorization_header(request) is None:
-                logging.debug("Authorization header missing")
+            if (
+                auth.authorization_header(request) is None
+                and auth.session_cookie(request) is None
+            ):
+                logging.debug("Authorization header & session cookie missing")
                 abort(401, description="Unauthorized")
             if auth.current_user(request) is None:
                 logging.debug("Forbidden: No current user")

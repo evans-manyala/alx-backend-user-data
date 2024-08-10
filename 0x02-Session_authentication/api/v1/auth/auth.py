@@ -4,6 +4,7 @@ Definition of class Auth
 """
 from flask import request
 from typing import List, Optional, TypeVar
+import os
 
 
 class Auth:
@@ -67,3 +68,20 @@ class Auth:
             is successful, otherwise None.
         """
         return None
+
+    def session_cookie(self, request=None) -> Optional[str]:
+        """
+        Get the session cookie from the request object.
+
+        Args:
+            request: The incoming request object.
+
+        Returns:
+            Optional[str]: The value of the session cookie if present,
+            otherwise None.
+        """
+        if request is None:
+            return None
+
+        session_name = os.getenv("SESSION_NAME", "_my_session_id")
+        return request.cookies.get(session_name)

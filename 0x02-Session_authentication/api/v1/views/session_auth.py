@@ -9,8 +9,8 @@ import os
 app_views = Blueprint("session_auth", __name__)
 
 
-@app_views.route("/auth_session/login/", methods=["POST"], strict_slashes=False)
-@app_views.route("/auth_session/login", methods=["POST"], strict_slashes=False)
+@app_views.route("/auth_session/login/", methods=["POST"],
+                 strict_slashes=False)
 def login():
     """
     POST /api/v1/auth_session/login

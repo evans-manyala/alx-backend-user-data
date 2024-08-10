@@ -44,13 +44,15 @@ def login() -> Tuple[str, int]:
 
         session_id = auth.create_session(users[0].id)
         result = jsonify(users[0].to_json())
-        result.set_cookie(os.getenv("SESSION_NAME", "_my_session_id"), session_id)
+        result.set_cookie(os.getenv("SESSION_NAME", "_my_session_id"),
+                          session_id)
         return result
 
     return jsonify({"error": "wrong password"}), 401
 
 
-@app_views.route("/auth_session/logout", methods=["DELETE"], strict_slashes=False)
+@app_views.route("/auth_session/logout", methods=["DELETE"],
+                 strict_slashes=False)
 def logout() -> Tuple[str, int]:
     """
     DELETE /api/v1/auth_session/logout

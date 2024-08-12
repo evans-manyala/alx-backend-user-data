@@ -6,10 +6,11 @@ API Route Module
 import os
 from os import getenv
 from api.v1.views import app_views
+from typing import Dict, Tuple
+
 from flask import Flask, jsonify, abort, request
 from flask_cors import CORS, cross_origin
 import logging
-from api.v1.auth.session_auth import SessionAuth
 
 
 app = Flask(__name__)
@@ -17,27 +18,66 @@ app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
 # Initialize authentication mechanism based on environment variable
-auth = None
-AUTH_TYPE = os.getenv("AUTH_TYPE")
-if AUTH_TYPE == "auth":
-    from api.v1.auth.auth import Auth
 
-    auth = Auth()
-elif AUTH_TYPE == "basic_auth":
+auth = None
+
+
+auth_type = getenv("AUTH_TYPE")
+
+
+if auth_type == "basic_auth":
+
     from api.v1.auth.basic_auth import BasicAuth
 
     auth = BasicAuth()
-if AUTH_TYPE == "session_auth":
+
+elif auth_type == "auth":
+
+    from api.v1.auth.auth import Auth
+
+    auth = Auth()
+
+elif auth_type == "session_auth":
+
+    from api.v1.auth.session_auth import SessionAuth
 
     auth = SessionAuth()
 
-if AUTH_TYPE == "session_exp_auth":
+elif auth_type == "session_exp_auth":
+
+    from api.v1.auth.session_exp_auth import SessionExpAuth
 
     auth = SessionExpAuth()
 
-if AUTH_TYPE == "session_db_auth":
+elif auth_type == "session_db_auth":
+
+    from api.v1.auth.session_db_auth import SessionDBAuth
 
     auth = SessionDBAuth()
+
+
+@app.errorhandler(404)
+def not_found(_) -> Tuple[Dict, int]:
+    """
+    Handle 404 errors: Resource not found
+    """
+    return jsonify({"error": "Not found"}), 404
+
+
+@app.errorhandler(401)
+def unauthorized(_) -> Tuple[Dict, int]:
+    """
+    Handle 401 errors: Unauthorized request
+    """
+    return jsonify({"error": "Unauthorized"}), 401
+
+
+@app.errorhandler(403)
+def forbidden(_) -> Tuple[Dict, int]:
+    """
+    Handle 403 errors: Forbidden request
+    """
+    return jsonify({"error": "Forbidden"}), 403
 
 
 @app.before_request
@@ -67,30 +107,6 @@ def before_request():
             if user is None:
                 abort(403)
             request.current_user = user
-
-
-@app.errorhandler(404)
-def not_found(error) -> str:
-    """
-    Handle 404 errors: Resource not found
-    """
-    return jsonify({"error": "Not found"}), 404
-
-
-@app.errorhandler(401)
-def unauthorized(error) -> str:
-    """
-    Handle 401 errors: Unauthorized request
-    """
-    return jsonify({"error": "Unauthorized"}), 401
-
-
-@app.errorhandler(403)
-def forbidden(error) -> str:
-    """
-    Handle 403 errors: Forbidden request
-    """
-    return jsonify({"error": "Forbidden"}), 403
 
 
 if __name__ == "__main__":

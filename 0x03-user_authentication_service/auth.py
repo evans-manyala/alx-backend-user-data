@@ -5,8 +5,8 @@ Hashed Password Utility module
 
 from db import DB
 from user import User
-from bcrypt import hashpw, gensalt
-
+import bcrypt
+from sqlalchemy.exc import NoResultFound
 
 class Auth:
     """
@@ -16,7 +16,7 @@ class Auth:
     def __init__(self) -> None:
         self._db = DB()
 
-    def _hash_password(password: str) -> bytes:
+    def _hash_password(self, password: str) -> bytes:
         """
         Hashes a password using bcrypt
         """
@@ -25,7 +25,7 @@ class Auth:
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
         return hashed_password
 
-    def register_user(self, email, password):
+    def register_user(self, email: str, password: str) -> User:
         """
         Registers a new user with the given email and password
         """

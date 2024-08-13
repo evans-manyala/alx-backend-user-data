@@ -67,9 +67,9 @@ class DB:
             NoResultFound: If no results are found matching the criteria.
             InvalidRequestError: If the query arguments are invalid.
         """
-
+        session = self._session
         try:
-            user = self._session.query(User).filter_by(**kwargs).first()
+            user = self._session.query(User).filter_by(**kwargs).one()
         except NoResultFound:
             raise NoResultFound("No user found matching the criteria.")
         except Exception as e:

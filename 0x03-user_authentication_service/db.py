@@ -69,11 +69,11 @@ class DB:
         """
         session = self._session
         try:
-            user = self._session.query(User).filter_by(**kwargs).one()
+            user = session.query(User).filter_by(**kwargs).one()
         except NoResultFound:
             raise NoResultFound("No user found matching the criteria.")
-        except Exception as e:
-            raise InvalidRequestError("Invalid query arguments.") from e
+        except InvalidRequestError:
+            raise InvalidRequestError("Invalid query arguments.")
         return user
 
     def update_user(self, user_id: int, **kwargs) -> None:

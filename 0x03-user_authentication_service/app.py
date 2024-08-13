@@ -3,22 +3,23 @@
 Basic Flask App
 """
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from auth import Auth
-from flask import request
 
+# Instantiate the Auth object
 AUTH = Auth()
 
-
+# Create a new Flask application instance
 app = Flask(__name__)
 
 
 @app.route("/", methods=["GET"], strict_slashes=False)
 def home():
     """
-    Handle GET requests to the root URL
+    Handle GET requests to the root URL.
+
     Returns:
-        Response: A JSON response with a message
+        Response: A JSON response with a message.
     """
     return jsonify({"message": "Bienvenue"})
 
@@ -26,20 +27,24 @@ def home():
 @app.route("/users", methods=["POST"], strict_slashes=False)
 def register_user():
     """
-    Handle POST requests to the /users URL
-    Returns:
-        Response: A JSON response with a message
-    """
+    Handle POST requests to the /users URL.
 
+    Returns:
+        Response: A JSON response indicating registration attempt.
+    """
     email = request.form.get("email")
     password = request.form.get("password")
 
-    if not email or password:
+    if not email or not password:
         return jsonify({"error": "Email and password are required"}), 400
+
     try:
         user = AUTH.register_user(email=email, password=password)
-        return jsonify({"email": user.email, "message":
-                        "User created successfully"})
+        return (
+            jsonify({"email": user.email, "message":
+                     "User created successfully"}),
+            201,
+        )
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 

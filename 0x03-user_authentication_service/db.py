@@ -7,7 +7,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.exc import InvalidRequestError, IntegrityError
+
 
 from user import Base, User
 
@@ -48,9 +49,14 @@ class DB:
             User: The newly created User object.
         """
         new_user = User(email=email, hashed_password=hashed_password)
-        self._session.add(new_user)
-        self._session.commit()
-        return new_user
+
+        try:
+            self._session.add(new_user)
+            self._session.commit()
+            return new_user
+        except IntegrityError as e:
+            self._session.rollback()
+            raise ValueError(f"Error adding user:{e}")
 
     def find_user_by(self, **kwargs) -> User:
         """
@@ -89,8 +95,8 @@ class DB:
         """
 
         user = self.find_user_by(id=user_id)
-        valid_attributes = {"email", "hashed_password", "session_id",
-                            "reset_token"}
+        valid_attributes = {"email", "hashed_password",
+                            "session_id", "reset_token"}
         for key, value in kwargs.items():
             if key not in valid_attributes:
                 raise ValueError(f"Invalid attribute: {key}")

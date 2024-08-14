@@ -21,7 +21,7 @@ class DB:
         """
         Initialize a new DB instance
         """
-        self._engine = create_engine("sqlite:///a.db", echo=True)
+        self._engine = create_engine("sqlite:///a.db", echo=False)
         Base.metadata.drop_all(self._engine)
         Base.metadata.create_all(self._engine)
         self.__session = None
@@ -67,14 +67,16 @@ class DB:
             NoResultFound: If no results are found matching the criteria.
             InvalidRequestError: If the query arguments are invalid.
         """
-        session = self._session
-        try:
-            user = session.query(User).filter_by(**kwargs).one()
-        except NoResultFound:
-            raise NoResultFound("No user found matching the criteria.")
-        except InvalidRequestError:
-            raise InvalidRequestError("Invalid query arguments.")
-        return user
+
+        allUsers = self.__session.query(User)
+
+        for x, y in kwargs.items():
+            if x not in User.__dict__:
+                raise InvalidRequestError("Invalid query arguments.")
+            for usr in allUsers:
+                if getattr(usr, x) == y:
+                    return usr
+        raise NoResultFound("No user found matching the criteria.")
 
     def update_user(self, user_id: int, **kwargs) -> None:
         """Update a user's attributes based on the provided keyword arguments.

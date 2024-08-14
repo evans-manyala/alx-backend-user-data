@@ -67,13 +67,14 @@ class DB:
             NoResultFound: If no results are found matching the criteria.
             InvalidRequestError: If the query arguments are invalid.
         """
+        session = self._session
         try:
-            user = self._session.query(User).filter_by(**kwargs).first()
-            if user is None:
-                raise NoResultFound("No user found matching the criteria.")
-            return user
-        except Exception as e:
-            raise InvalidRequestError("Invalid query arguments.") from e
+            user = session.query(User).filter_by(**kwargs).one()
+        except NoResultFound:
+            raise NoResultFound("No user found matching the criteria.")
+        except InvalidRequestError:
+            raise InvalidRequestError("Invalid query arguments.")
+        return user
 
     def update_user(self, user_id: int, **kwargs) -> None:
         """Update a user's attributes based on the provided keyword arguments.

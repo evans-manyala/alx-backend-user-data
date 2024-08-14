@@ -1,3 +1,5 @@
 api/__pycache__/
 api/v1/__pycache__/
 myenv/
+__pycache__/
+node_modules/

@@ -12,7 +12,7 @@ AUTH = Auth()
 
 
 @app.route("/", methods=["GET"], strict_slashes=False)
-def home():
+def index():
     """
     Handle GET requests to the root URL.
 
@@ -23,9 +23,9 @@ def home():
 
 
 @app.route("/users", methods=["POST"], strict_slashes=False)
-def register_user():
+def users():
     """
-    Handle POST requests to the /users URL.
+    Handle POST requests to register users.
 
     Returns:
         Response: A JSON response indicating registration attempt.

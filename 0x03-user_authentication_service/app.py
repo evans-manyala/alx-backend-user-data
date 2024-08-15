@@ -23,28 +23,21 @@ def index():
 
 
 @app.route("/users", methods=["POST"], strict_slashes=False)
-def users():
+def users() -> str:
     """
-    Handle POST requests to register users.
+    Handle GET requests to the root URL.
 
     Returns:
-        Response: A JSON response indicating registration attempt.
+        Response: A JSON response with a message.
     """
     email = request.form.get("email")
     password = request.form.get("password")
-
-    if not email or not password:
-        return jsonify({"error": "Email and password are required"}), 400
-
     try:
-        user = AUTH.register_user(email=email, password=password)
-        return (
-            jsonify({"email": user.email, "message":
-                     "User created successfully"}),
-            201,
-        )
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+        user = AUTH.register_user(email, password)
+    except ValueError:
+        return jsonify({"message": "email already registered"}), 400
+
+    return jsonify({"email": f"{email}", "message": "user created"})
 
 
 if __name__ == "__main__":

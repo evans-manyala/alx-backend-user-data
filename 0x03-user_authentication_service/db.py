@@ -50,13 +50,9 @@ class DB:
         """
         new_user = User(email=email, hashed_password=hashed_password)
 
-        try:
-            self._session.add(new_user)
-            self._session.commit()
-            return new_user
-        except IntegrityError as e:
-            self._session.rollback()
-            raise ValueError(f"Error adding user:{e}")
+        self._session.add(new_user)
+        self._session.commit()
+        return new_user
 
     def find_user_by(self, **kwargs) -> User:
         """

@@ -6,11 +6,9 @@ Basic Flask App
 from flask import Flask, jsonify, request
 from auth import Auth
 
-# Instantiate the Auth object
-AUTH = Auth()
 
-# Create a new Flask application instance
 app = Flask(__name__)
+AUTH = Auth()
 
 
 @app.route("/", methods=["GET"], strict_slashes=False)

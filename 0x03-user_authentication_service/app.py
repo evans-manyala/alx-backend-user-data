@@ -3,8 +3,17 @@
 Basic Flask App
 """
 
-from flask import Flask, jsonify, request
+from flask import (
+    Flask,
+    jsonify,
+    request,
+    abort,
+    redirect,
+    url_for
+)
+from flask_cors import CORS
 from auth import Auth
+
 
 app = Flask(__name__)
 AUTH = Auth()
@@ -33,15 +42,12 @@ def users() -> str:
     email = request.form.get("email")
     password = request.form.get("password")
 
-    # Validate input
-    if not email or not password:
-        return jsonify({"message": "email and password are required"}), 400
-
     try:
         user = AUTH.register_user(email, password)
-        return jsonify({"email": email, "message": "user created"}), 201
     except ValueError:
         return jsonify({"message": "email already registered"}), 400
+
+    return jsonify({"email": f"{email}", "message": "user created"})
 
 
 if __name__ == "__main__":

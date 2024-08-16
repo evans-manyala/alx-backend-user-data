@@ -4,14 +4,10 @@ Basic Flask App
 """
 
 import os
-from flask import (
-    Flask, abort, jsonify, redirect, request
-)
+from typing import Tuple
+from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
 from auth import Auth
-from typing import Tuple
-# import utils
-
 
 app = Flask(__name__)
 AUTH = Auth()
@@ -29,13 +25,13 @@ def index():
 
 
 @app.route("/users", methods=["POST"], strict_slashes=False)
-def users() -> str:
+def users() -> Tuple[jsonify, int]:
     """
     Handle POST requests to the /users endpoint to register a new user.
 
     Returns:
-        Response: A JSON response indicating the result of the user
-        registration.
+        Tuple[jsonify, int]: A tuple containing the JSON response and
+        the HTTP status code.
     """
     email = request.form.get("email")
     password = request.form.get("password")
@@ -46,7 +42,7 @@ def users() -> str:
 
     try:
         user = AUTH.register_user(email, password)
-        return jsonify({"email": email, "message": "user created"}), 201
+        return jsonify({"email": user.email, "message": "user created"}), 201
     except ValueError:
         return jsonify({"message": "email already registered"}), 400
 

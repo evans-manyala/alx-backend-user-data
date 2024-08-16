@@ -9,7 +9,9 @@ from flask import (
     request,
     abort,
     redirect,
-    url_for
+    url_for,
+    make_response,
+    session
 )
 from flask_cors import CORS
 from auth import Auth
@@ -51,6 +53,29 @@ def users() -> str:
         return jsonify({"email": email, "message": "user created"}), 201
     except ValueError:
         return jsonify({"message": "email already registered"}), 400
+
+
+@app.route('/sessions', methods=['POST'], strict_slashes=False)
+def login():
+    """
+    Login a user and create a session.
+    """
+    email = request.form.get('email')
+    password = request.form.get('password')
+
+    if not AUTH.valid_login(email, password):
+        abort(401)  # Incorrect login information
+
+    session_id = AUTH.create_session(email)
+    if session_id is None:
+        abort(401)  # Failed to create a session
+
+    response = make_response(jsonify({
+        "email": email,
+        "message": "session created"
+    }))
+    response.set_cookie('session_id', session_id)
+    return response
 
 
 if __name__ == "__main__":

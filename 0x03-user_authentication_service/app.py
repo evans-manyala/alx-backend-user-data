@@ -120,5 +120,23 @@ def profile() -> Tuple[Response, int]:
     }), 200
 
 
+@app.route("/reset_password", methods=["POST"], strict_slashes=False)
+def get_reset_password_token() -> Tuple[Response, int]:
+    """
+    Handle POST requests to the /reset_password endpoint to generate
+    a reset token for the user's password.
+
+    Returns:
+        Tuple[Response, int]: A tuple containing the JSON response and
+        the HTTP status code.
+    """
+    email = request.form.get("email")
+    try:
+        reset_token = AUTH.get_reset_password_token(email)
+    except ValueError:
+        abort(403)
+    return jsonify({"email": email, "reset_token": reset_token}), 200
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

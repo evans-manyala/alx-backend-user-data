@@ -117,7 +117,7 @@ class Auth:
             None
         """
         try:
-            user = self._db.find_user_by(id=user_id)
+            self._db.find_user_by(id=user_id)
         except NoResultFound:
             raise ValueError(f"{user_id} is not a valid user ID.")
-        self._db.update_user(user, session_id=None)
+        self._db.update_user(user_id=user_id, session_id=None)

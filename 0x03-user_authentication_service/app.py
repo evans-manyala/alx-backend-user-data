@@ -65,15 +65,12 @@ def login() -> Tuple[Response, int]:
     if not email or not password:
         return jsonify({"message": "email and password are required"}), 400
 
-    if not AUTH.valid_credentials(email, password):
+    if not AUTH.valid_credentials(email=email, password=password):
         abort(401)
 
     session_id = AUTH.create_session(email)
-    if not session_id:
-        abort(401)  # Unauthorized
-
     response = make_response(jsonify({"email": email, "message": "logged in"}))
-    response.set_cookie("session_id", session_id)
+    response.set_cookie(key="session_id", value=session_id)
     return response, 200
 
 

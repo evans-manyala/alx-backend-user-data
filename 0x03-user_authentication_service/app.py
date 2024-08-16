@@ -5,7 +5,7 @@ Basic Flask App
 
 import os
 from typing import Tuple
-from flask import Flask, abort, jsonify, request
+from flask import Flask, abort, jsonify, request, make_response
 from flask_cors import CORS
 from auth import Auth
 from werkzeug import Response
@@ -46,6 +46,34 @@ def users() -> Tuple[Response, int]:
         return jsonify({"email": user.email, "message": "user created"}), 200
     except ValueError:
         return jsonify({"message": "email already registered"}), 400
+
+
+@app.route("/sessions", methods=["POST"], strict_slashes=False)
+def login() -> Tuple[Response, int]:
+    """
+    Handle POST requests to the /sessions endpoint to log in a user.
+
+    Returns:
+        Tuple[jsonify, int]: A tuple containing the JSON response and
+        the HTTP status code.
+    """
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    # Validate input
+    if not email or not password:
+        return jsonify({"message": "email and password are required"}), 400
+
+    if not AUTH.valid_credentials(email, password):
+        abort(401)
+
+    session_id = AUTH.create_session(email)
+    if not session_id:
+        abort(401)  # Unauthorized
+
+    response = make_response(jsonify({"email": email, "message": "logged in"}))
+    response.set_cookie("session_id", session_id)
+    return response, 200
 
 
 if __name__ == "__main__":

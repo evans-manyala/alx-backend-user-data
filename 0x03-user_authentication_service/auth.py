@@ -8,16 +8,14 @@ from user import User
 import bcrypt
 from sqlalchemy.orm.exc import NoResultFound
 from uuid import uuid4
-from typing import Union, Tuple
+from typing import Union
 
 
 def _hash_password(password: str) -> bytes:
     """
     Hashes a password using bcrypt
     """
-
-    hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-    return hashed_password
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
 
 def _generate_uuid() -> str:
@@ -46,14 +44,11 @@ class Auth:
 
         try:
             self._db.find_user_by(email=email)
+            raise ValueError(f"User {email} already exists")
         except NoResultFound:
-            pass
-
-        else:
-            raise ValueError("User already exists")
-
-        hashed_password = _hash_password(password=password).decode()
-        return self._db.add_user(email=email, hashed_password=hashed_password)
+            hashed_password = _hash_password(password).decode()
+            return self._db.add_user(email=email,
+                                     hashed_password=hashed_password)
 
     def valid_login(self, email: str, password: str) -> bool:
         """
@@ -65,15 +60,13 @@ class Auth:
         Return:
             True if credentials are correct, else False
         """
-
         try:
             user = self._db.find_user_by(email=email)
         except NoResultFound:
             return False
 
-        user_password = user.hashed_password
-        passwd_ = password.encode("utf-8")
-        return bcrypt.checkpw(passwd_, user_password)
+        return bcrypt.checkpw(password.encode("utf-8"),
+                              user.hashed_password.encode("utf-8"))
 
     def create_session(self, email: str) -> Union[str, None]:
         """
@@ -91,6 +84,6 @@ class Auth:
         except NoResultFound:
             return None
 
-            session_id = _generate_uuid()
-            self._db.update_user(user.id, session_id=session_id)
-            return session_id
+        session_id = _generate_uuid()
+        self._db.update_user(user.id, session_id=session_id)
+        return session_id

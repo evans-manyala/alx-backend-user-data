@@ -26,7 +26,7 @@ def index():
 
 
 @app.route("/users", methods=["POST"], strict_slashes=False)
-def users() -> Tuple[jsonify, int]:
+def users() -> Tuple[Response, int]:
     """
     Handle POST requests to the /users endpoint to register a new user.
 
@@ -43,7 +43,7 @@ def users() -> Tuple[jsonify, int]:
 
     try:
         user = AUTH.register_user(email, password)
-        return jsonify({"email": user.email, "message": "user created"}), 201
+        return jsonify({"email": user.email, "message": "user created"}), 200
     except ValueError:
         return jsonify({"message": "email already registered"}), 400
 

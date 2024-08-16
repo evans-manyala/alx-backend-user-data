@@ -96,5 +96,29 @@ def logout() -> Tuple[Response, int]:
     return redirect("/")
 
 
+@app.route("/profile", methods=["GET"], strict_slashes=False)
+def profile() -> Tuple[Response, int]:
+    """
+    GET requests to the /profile endpoint to get user profile information.
+
+    Returns:
+        Tuple[Response, int]: A tuple containing the JSON response &
+        the HTTP status code.
+    """
+    session_id = request.cookies.get("session_id")
+
+    if not session_id:
+        abort(403)
+
+    user = AUTH.get_user_from_session_id(session_id)
+
+    if not user:
+        abort(403)
+    return jsonify({
+        "email": user.email,
+        "message": "Profile information retrieved successfully"
+    }), 200
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

@@ -70,15 +70,18 @@ class DB:
             InvalidRequestError: If the query arguments are invalid.
         """
 
-        allUsers = self.__session.query(User)
+        query = self._session.query(User)
 
-        for x, y in kwargs.items():
-            if x not in User.__dict__:
-                raise InvalidRequestError("Invalid query arguments.")
-            for usr in allUsers:
-                if getattr(usr, x) == y:
-                    return usr
-        raise NoResultFound("No user found matching the criteria.")
+        for key, value in kwargs.items():
+            if not hasattr(User, key):
+                raise InvalidRequestError(f"Invalid query argument: {key}")
+            query = query.filter_by(**{key: value})
+
+        user = query.first()
+        if user is None:
+            raise NoResultFound("No user found matching the criteria.")
+
+        return user
 
     def update_user(self, user_id: int, **kwargs) -> None:
         """Update a user's attributes based on the provided keyword arguments.

@@ -39,14 +39,21 @@ class Auth:
         """
         Registers a new user with the given email and password
         """
+        if not email:
+            raise ValueError("Email cannot be empty")
+        if not password:
+            raise ValueError("Password cannot be empty")
+
         try:
-            existing_user = self._db.find_user_by(email=email)
-            raise ValueError(f"User {existing_user.email} already exists")
+            self._db.find_user_by(email=email)
         except NoResultFound:
-            hashed_password = _hash_password(password)
-            new_user = self._db.add_user(email=email,
-                                         hashed_password=hashed_password)
-        return new_user
+            pass
+
+        else:
+            raise ValueError("User already exists")
+
+        hashed_password = _hash_password(password=password).decode()
+        return self._db.add_user(email=email, hashed_password=hashed_password)
 
     def valid_login(self, email: str, password: str) -> bool:
         """

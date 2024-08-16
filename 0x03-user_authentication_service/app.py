@@ -123,7 +123,7 @@ def profile() -> Tuple[Response, int]:
 @app.route("/reset_password", methods=["POST"], strict_slashes=False)
 def get_reset_password_token() -> Tuple[Response, int]:
     """
-    Handle POST requests to the /reset_password endpoint to generate
+    POST requests to the /reset_password endpoint to generate
     a reset token for the user's password.
 
     Returns:
@@ -136,6 +136,35 @@ def get_reset_password_token() -> Tuple[Response, int]:
     except ValueError:
         abort(403)
     return jsonify({"email": email, "reset_token": reset_token}), 200
+
+
+@app.route("/reset_password", methods=["PUT"], strict_slashes=False)
+def update_password() -> Tuple[Response, int]:
+    """
+    PUT requests to the /reset_password endpoint to update
+    a user's password.
+
+    Returns:
+        Tuple[Response, int]: A tuple containing the JSON response and
+        the HTTP status code.
+    """
+
+    response, error_msgs = utils.request_body_provided(
+        expected_fields={"email": str, "reset_token": str, "new_password": str}
+    )
+
+    if not response:
+        return jsonify({"message": error_msgs}), 400
+
+    email = request.form.get("email")
+    reset_token = request.form.get("reset_token")
+    new_password = request.form.get("new_password")
+
+    try:
+        AUTH.update_password(reset_token=reset_token, password=new_password)
+    except ValueError:
+        abort(403)
+    return jsonify({"message": "Password updated successfully"}), 200
 
 
 if __name__ == "__main__":

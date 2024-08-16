@@ -3,18 +3,14 @@
 Basic Flask App
 """
 
+import os
 from flask import (
-    Flask,
-    jsonify,
-    request,
-    abort,
-    redirect,
-    url_for,
-    make_response,
-    session
+    Flask, abort, jsonify, redirect, request
 )
 from flask_cors import CORS
 from auth import Auth
+from typing import Tuple
+import utils
 
 
 app = Flask(__name__)
@@ -55,26 +51,33 @@ def users() -> str:
         return jsonify({"message": "email already registered"}), 400
 
 
-@app.route("/sessions", methods=["POST"], strict_slashes=False)
-def login() -> str:
+@app.route("/sessions", methods=["POST"])
+def login() -> Tuple[Response, int]:
     """
     Log in a user if the credentials provided are correct, and create a new
     session for them.
     """
+    success, error_msgs = utils.request_body_provided(
+        expected_fields={"email", "password"}
+    )
+    if not success:
+        return jsonify({"message": error_msgs}), 400
+
     email = request.form.get("email")
     password = request.form.get("password")
 
-    if not AUTH.valid_login(email, password):
+    if not AUTH.valid_login(email=email, password=password):
         abort(401)
 
-    session_id = AUTH.create_session(email)
+    session_id = AUTH.create_session(email=email)
     if session_id is None:
         abort(401)
 
-    resp = jsonify({"email": email, "message": "logged in"})
-    resp.set_cookie("session_id", session_id, secure=True,
+    data = jsonify({"email": email, "message": "logged in"})
+    data.set_cookie(key="session_id", value=session_id, secure=True,
                     httponly=True, samesite='Lax')
-    return resp
+
+    return data, 200
 
 
 if __name__ == "__main__":

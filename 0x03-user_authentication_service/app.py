@@ -77,5 +77,24 @@ def login() -> Tuple[Response, int]:
     return response, 200
 
 
+@app.route("/sessions", methods=["DELETE"], strict_slashes=False)
+def logout() -> Tuple[Response, int]:
+    """
+    DELETES requests to the /sessions endpoint to log out a user.
+
+    Returns:
+        Tuple[Response, int]: A tuple containing the response
+        & HTTP status code.
+    """
+    session_id = request.cookies.get("session_id")
+    user = AUTH.get_user_from_session_id(session_id)
+
+    if not user:
+        return jsonify({"message": "Invalid session ID"}), 403
+
+    AUTH.destroy_session(user.id)
+    return redirect("/")
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

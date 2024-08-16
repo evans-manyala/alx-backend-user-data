@@ -8,6 +8,7 @@ from typing import Tuple
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
 from auth import Auth
+from werkzeug import Response
 
 app = Flask(__name__)
 AUTH = Auth()

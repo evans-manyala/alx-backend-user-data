@@ -164,8 +164,7 @@ def update_password() -> Tuple[Response, int]:
         AUTH.update_password(reset_token=reset_token, password=new_password)
     except ValueError:
         abort(403)
-    return jsonify({"email": "<user email>", "message":
-                    "Password updated"}), 200
+    return jsonify({"email": email, "message": "Password updated"}), 200
 
 
 if __name__ == "__main__":

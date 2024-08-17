@@ -149,14 +149,23 @@ def update_password() -> Tuple[Response, int]:
         the HTTP status code.
     """
 
+    response, error_msgs = utils.request_body_provided(
+        expected_fields={"email", "reset_token", "new_password"}
+    )
+
+    if not response:
+        return jsonify({"message": error_msgs}), 400
+
     email = request.form.get("email")
     reset_token = request.form.get("reset_token")
     new_password = request.form.get("new_password")
+
     try:
-        AUTH.update_password(reset_token, new_password)
-        return jsonify({"email": email, "message": "Password updated"})
+        AUTH.update_password(reset_token=reset_token, password=new_password)
     except ValueError:
         abort(403)
+    return jsonify({"email": "<user email>", "message":
+                    "Password updated"}), 200
 
 
 if __name__ == "__main__":

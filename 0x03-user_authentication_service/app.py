@@ -139,7 +139,7 @@ def get_reset_password_token() -> Tuple[Response, int]:
 
 
 @app.route("/reset_password", methods=["PUT"], strict_slashes=False)
-def update_password() -> Tuple[Response, int]:
+def update_password() -> str:
     """
     PUT requests to the /reset_password endpoint to update
     a user's password.
@@ -156,10 +156,13 @@ def update_password() -> Tuple[Response, int]:
     email = request.form.get("email")
     reset_token = request.form.get("reset_token")
     new_password = request.form.get("new_password")
-
+    has_password_changed = False
     try:
         AUTH.update_password(reset_token=reset_token, password=new_password)
+        has_password_changed = True
     except ValueError:
+        has_password_changed = False
+    if not has_password_changed:
         abort(403)
 
     return jsonify({"email": email, "message": "Password updated"}), 200
